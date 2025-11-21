@@ -12,6 +12,8 @@ dependencies:
   flutter_localizations: # Per multilingua
     sdk: flutter
 
+  toggle_switch: ^2.3.0
+
   # Sensori (Context-Aware)
   sensors_plus: ^7.0.0 # Per la livella [Lezione 1]
 
@@ -19,13 +21,10 @@ dependencies:
   sqflite: ^2.3.3 # Per il database SQLite [Lezione 7]
   path: ^1.9.0 # Utility per sqflite
 
-  # Temi (Diversifier)
-  dynamic_color: ^1.8.0 # Per temi Material You [Lezione 4]
-
   # Utility
   intl: ^0.20.2
-
   cupertino_icons: ^1.0.2
+  font_awesome_flutter: ^10.7.0
 
 dev_dependencies:
   flutter_test:

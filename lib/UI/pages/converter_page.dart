@@ -14,7 +14,10 @@ class _ConverterPageState extends State<ConverterPage> {
     // Aggiungiamo uno Scaffold e una AppBar a QUESTA pagina
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.translate('convertitore')),
+        title: Text(
+          AppLocalizations.of(context)!.translate('convertitore'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
       body: const Center(

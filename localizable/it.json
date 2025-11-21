@@ -1,5 +1,14 @@
 {
   "livella": "Livella",
   "convertitore": "Convertitore",
-  "impostazioni": "Impostazioni"
+  "impostazioni": "Impostazioni",
+  "app_title": "Utility Toolset",
+  "tab_level": "Livella",
+  "tab_converter": "Convertitore",
+  "tab_settings": "Impostazioni",
+  "tema_chiaro": "Chiaro",
+  "tema_scuro": "Scuro",
+  "tema_sistema": "Automatico (Sistema)",
+  "Tema": "Tema",
+  "Lingua": "Lingua"
 }

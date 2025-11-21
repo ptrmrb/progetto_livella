@@ -4,68 +4,89 @@ import 'pages/converter_page.dart';
 import 'pages/home_page.dart';
 import 'pages/settings_page.dart';
 
-// Come da slide Lezione 4, slide 4
 class MainLayout extends StatelessWidget {
-  const MainLayout({Key? key}) : super(key: key);
+  final ThemeMode currentThemeMode;
+  final Function(ThemeMode?) onThemeChanged;
+  final Locale currentLocale;
+  final Function(Locale) onLocaleChanged;
+
+  const MainLayout({
+    Key? key,
+    required this.currentThemeMode,
+    required this.onThemeChanged,
+    required this.currentLocale,
+    required this.onLocaleChanged,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Il DefaultTabController gestisce la sincronia tra le schede
-    return DefaultTabController(
-      length: 3, // Il nostro numero di schede
-      child: Scaffold(
+    final brightness = Theme.of(context).brightness;
+    final colorScheme = Theme.of(context).colorScheme;
 
-        // Il body contiene le pagine che cambiano
-        body: const TabBarView(
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        body: TabBarView(
           children: [
-            SettingsPage(), // Pagina 0
-            HomePage(), // Pagina 1
-            ConverterPage(), // Pagina 2
+            SettingsPage(
+              currentThemeMode: currentThemeMode,
+              onThemeChanged: onThemeChanged,
+              currentLocale: currentLocale,
+              onLocaleChanged: onLocaleChanged,
+            ),
+            const HomePage(),
+            const ConverterPage(),
           ],
         ),
-        bottomNavigationBar: Padding( // padding per spostare la bottom navigation bar rispetto allo schermo
-          padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
           child: Container(
-            height: 80.0, // altezza interna della bottom navigation bar
+            height: 85.0,
 
             decoration: BoxDecoration(
-              //bordo della navigation bar
+              color: (brightness == Brightness.light)
+                  ? Colors.grey.shade900
+                  : Colors.grey.shade800,
+
               border: Border.all(color: Colors.black12, width: 4),
-              borderRadius:
-              BorderRadius.circular(30), // angolo dei bordi della navigation bar
-              boxShadow: const [
-                BoxShadow(
-                    color: Colors.black26, blurRadius: 10),
-              ],
+              borderRadius: BorderRadius.circular(30),
+
             ),
 
             child: TabBar(
-              labelColor: Theme.of(context).colorScheme.primary,
-              unselectedLabelColor:
-              Theme.of(context).colorScheme.onSurfaceVariant,
-              indicatorColor:
-              Colors.transparent, //nascondiamo la linea che compare sotto l'icona attiva
-              dividerHeight: 0.0, // nascondo linea bianca - divisore
+              labelColor: Colors.green, //colore della icona selezionata nella bnb
+              unselectedLabelColor: Colors.white60, // colore delle icone non selezionate nelle bnb
+              indicatorColor: Colors.transparent,
+              splashBorderRadius: BorderRadius.circular(30.0),
+              dividerHeight: 0.0,
 
-              // Allineo il raggio dello splash a quello del container
-              splashBorderRadius: BorderRadius.circular(
-                  30.0),
+              // modificatori dimensione della pillola
+              indicatorPadding: const EdgeInsets.symmetric(
+                  horizontal: -20.0, // Meno padding laterale -> più larga
+                  vertical: 15.0    // Più padding verticale -> più bassa/schiacciata
+              ),
 
-              tabs: const [
-                // Scheda 0: Impostazioni
-                Tab(
-                  icon: Icon(Icons.settings_rounded, size: 30.0),
+              // colori della pillola
+              indicator: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(15),
+              ),
+
+              tabs: [
+                const Tab(
+                  icon: Icon(Icons.settings_rounded, size: 35.0),
                 ),
-                // Scheda 1: Livella
                 Tab(
-                  icon: ImageIcon(
-                    AssetImage('assets/images/livella_icon.png'), // icona personalizzata
-                    size: 43.0,
+                  icon: Transform.scale(
+                    scale: 1.5, // Aumenta questo valore se serve (es. 1.8)
+                    child: const ImageIcon(
+                      AssetImage('assets/images/livella_icon.png'),
+                      size: 40.0, // Dimensione base
+                    ),
                   ),
                 ),
-                // Scheda 2: Convertitore
-                Tab(
-                  icon: Icon(Icons.swap_horiz_rounded, size: 30.0),
+                const Tab(
+                  icon: Icon(Icons.swap_horiz_rounded, size: 35.0),
                 ),
               ],
             ),
