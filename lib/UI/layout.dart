@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../model/support/app_localizations.dart';
 import 'pages/converter_page.dart';
 import 'pages/home_page.dart';
+import 'package:utility_toolset/app.dart';
 import 'pages/settings_page.dart';
 
 class MainLayout extends StatelessWidget {
@@ -42,7 +43,7 @@ class MainLayout extends StatelessWidget {
           padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
           child: Container(
             height: 85.0,
-
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               color: (brightness == Brightness.light)
                   ? Colors.grey.shade900
@@ -50,7 +51,6 @@ class MainLayout extends StatelessWidget {
 
               border: Border.all(color: Colors.black12, width: 4),
               borderRadius: BorderRadius.circular(30),
-
             ),
 
             child: TabBar(

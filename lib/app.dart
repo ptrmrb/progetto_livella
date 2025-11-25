@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart'; // Per localizzazione
-import 'UI/layout.dart'; // Il nostro Layout principale [Lezione 4]
-import 'model/support/app_localizations.dart'; // Classe helper [Lezione 4]
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:utility_toolset/model/support/app_localizations.dart';
+import 'UI/layout.dart';
 
 class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);
@@ -31,28 +31,32 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Utility Toolset',
 
-      //TEMA Chiaro
+      // --- TEMA CHIARO ---
       theme: ThemeData(
-        appBarTheme: AppBarTheme(
-          backgroundColor: Colors.grey.shade900,
-          foregroundColor: Colors.white70, // testo e icone bianchi
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.green,
+          brightness: Brightness.light,
         ),
-        scaffoldBackgroundColor: Colors.grey.shade200, // colore sfondo modalità chiara
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+        ),
         useMaterial3: true,
       ),
 
-      // TEMA SCURO (Dark)
+      // --- TEMA SCURO ---
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.grey.shade500,
+          seedColor: Colors.green,
           brightness: Brightness.dark,
         ),
+        scaffoldBackgroundColor: Colors.grey[900],
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.grey.shade800,
-          foregroundColor: Colors.white, // testo e icone bianchi
+          backgroundColor: Colors.grey.shade900,
+          foregroundColor: Colors.white,
         ),
-        scaffoldBackgroundColor: Colors.grey.shade900, // colore sfondo modalità scura
         useMaterial3: true,
       ),
 
@@ -78,6 +82,7 @@ class _AppState extends State<App> {
         return supportedLocales.first;
       },
 
+      // Ora MainLayout sarà riconosciuto correttamente grazie all'import package:
       home: MainLayout(
         currentThemeMode: _themeMode,
         onThemeChanged: _changeThemeMode,
