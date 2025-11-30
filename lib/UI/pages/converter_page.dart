@@ -11,14 +11,11 @@ class ConverterPage extends StatefulWidget {
 class _ConverterPageState extends State<ConverterPage> {
   @override
   Widget build(BuildContext context) {
-    // Aggiungiamo uno Scaffold e una AppBar a QUESTA pagina
     return Scaffold(
       appBar: AppBar(
         title: Text(
           AppLocalizations.of(context)!.translate('convertitore'),
-          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
       ),
       body: const Center(
         child: Text('Pagina Convertitore (View 2)'),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import '../model/support/app_localizations.dart';
 import 'pages/converter_page.dart';
 import 'pages/home_page.dart';
-import 'package:utility_toolset/app.dart';
 import 'pages/settings_page.dart';
 
 class MainLayout extends StatelessWidget {
@@ -22,7 +20,6 @@ class MainLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    final colorScheme = Theme.of(context).colorScheme;
 
     return DefaultTabController(
       length: 3,

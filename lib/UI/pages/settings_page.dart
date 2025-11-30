@@ -7,7 +7,7 @@ class SettingsPage extends StatefulWidget {
   final ThemeMode currentThemeMode;
   final Function(ThemeMode?) onThemeChanged;
 
-  // --- MODIFICA 1: Parametri Lingua ---
+  // Parametri Lingua
   final Locale currentLocale;
   final Function(Locale) onLocaleChanged;
 
@@ -30,11 +30,11 @@ class _SettingsPageState extends State<SettingsPage> {
     switch (widget.currentThemeMode) {
       case ThemeMode.light: return 0;
       case ThemeMode.dark: return 1;
-      case ThemeMode.system: default: return 2;
+      case ThemeMode.system: return 2;
     }
   }
 
-  // --- MODIFICA 2: Helper per Lingua ---
+  // Helper per Lingua
   // 0 = Inglese, 1 = Italiano
   int _getLocaleIndex() {
     if (widget.currentLocale.languageCode == 'it') {
@@ -45,22 +45,16 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Stile comune per i titoli
     final titleStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
       fontWeight: FontWeight.bold,
     );
 
     return Scaffold(
       appBar: AppBar(
-        // --- MODIFICA: Aggiunto stile bold ---
         title: Text(
           AppLocalizations.of(context)!.translate('impostazioni'),
-          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
       ),
-
-
 
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -69,7 +63,7 @@ class _SettingsPageState extends State<SettingsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            // --- SEZIONE TEMA ---
+            // SEZIONE TEMA
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -115,7 +109,7 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 Text(AppLocalizations.of(context)!.translate('Lingua'), style: titleStyle),
                 ToggleSwitch(
-                  minWidth: 90.0, // Un po' più largo per le icone
+                  minWidth: 90.0,
                   minHeight: 50.0,
                   initialLabelIndex: _getLocaleIndex(),
                   cornerRadius: 20.0,

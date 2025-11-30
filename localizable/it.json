@@ -10,5 +10,9 @@
   "tema_scuro": "Scuro",
   "tema_sistema": "Automatico (Sistema)",
   "Tema": "Tema",
-  "Lingua": "Lingua"
+  "Lingua": "Lingua",
+  "MODALITA_PIANO": "MODALITA PIANO",
+  "MODALITA_VERTICALE": "MODALITA VERTICALE",
+  "MODALITA_ORIZZONTALE": "MODALITA ORIZZONTALE",
+  "Inclinazione": "Inclinazione"
 }

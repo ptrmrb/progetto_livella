@@ -10,5 +10,9 @@
   "tema_scuro": "Dark",
   "tema_sistema": "Automatic (System)",
   "Tema": "Theme",
-  "Lingua": "Language"
+  "Lingua": "Language",
+  "MODALITA_PIANO": "FLAT MODE",
+  "MODALITA_VERTICALE": "PORTRAIT MODE",
+  "MODALITA_ORIZZONTALE": "LANDSCAPE MODE",
+  "Inclinazione": "Tilt"
 }

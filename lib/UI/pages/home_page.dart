@@ -35,17 +35,22 @@ class _HomePageState extends State<HomePage> {
 
   // Funzione per iniziare ad ascoltare i dati dell'accelerometro
   void _startListening() {
-    _streamSubscription =
-        accelerometerEvents.listen((AccelerometerEvent event) {
-          if (mounted) {
-            // Aggiorna lo stato con i nuovi valori
-            setState(() {
-              _x = event.x;
-              _y = event.y;
-              _z = event.z;
-            });
-          }
-        });
+    _streamSubscription = accelerometerEvents.listen(
+          (AccelerometerEvent event) {
+        if (mounted) {
+          setState(() {
+            _x = event.x;
+            _y = event.y;
+            _z = event.z;
+          });
+        }
+      },
+      // Gestione errori nel caso il sensore non sia disponibile, visto in lezione 9
+      onError: (error) {
+        debugPrint("Errore Accelerometro: $error");
+      },
+      cancelOnError: true, // Chiude lo stream se c'è un errore critico
+    );
   }
 
   // Determina se il dispositivo è piatto (modalità livella torica)
@@ -60,7 +65,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // CALCOLI ALLINEAMENTO BOLLA
-  // Allineamento per la livella torica (cerchio)
+  // Allineamento per la livella torica
   Alignment _getBubbleAlignmentToric() {
     const double sensitivity = 5.0;
     double alignX = _x / sensitivity;
@@ -126,8 +131,10 @@ class _HomePageState extends State<HomePage> {
 
     // Parametri per Testi e Rotazione
     String titleText = flatMode
-        ? "MODALITÀ PIANO"
-        : (isPortrait ? "MODALITÀ VERTICALE" : "MODALITÀ ORIZZONTALE");
+        ? AppLocalizations.of(context)!.translate('MODALITA_PIANO')
+        : (isPortrait
+        ? AppLocalizations.of(context)!.translate('MODALITA_VERTICALE')
+        : AppLocalizations.of(context)!.translate('MODALITA_ORIZZONTALE') );
 
     int textTurns = 0;
     bool isLandscapeLeft = false; // Flag per capire se siamo in modalita landscape sinistra (x < 0)
@@ -140,9 +147,9 @@ class _HomePageState extends State<HomePage> {
 
     // Definiamo la transizione personalizzata (Fade + Scale)
     Widget transitionBuilder(Widget child, Animation<double> animation) {
-      return FadeTransition(
+      return FadeTransition(  //dissolvenza
         opacity: animation,
-        child: ScaleTransition(
+        child: ScaleTransition(   //comparsa
           scale: animation,
           child: child,
         ),
@@ -153,9 +160,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(
           AppLocalizations.of(context)!.translate('livella'),
-          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
       ),
       // Usiamo uno Stack per posizionare liberamente gli elementi
       body: Stack(
@@ -170,17 +175,18 @@ class _HomePageState extends State<HomePage> {
           AnimatedAlign(
             // Posizione: in alto per Portrait/Flat.
             // Per Landscape: se siamo a sinistra (x > 0), titolo a destra (-0.8). Se a destra (x < 0), titolo a sinistra (-0.8).
-            alignment: (flatMode || isPortrait)
+            alignment: (flatMode )
                 ? const Alignment(0.0, -0.8)
-                : (isLandscapeLeft ? const Alignment(0.8, 0.0) : const Alignment(-0.8, 0.0)),
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOutBack,
-            child: AnimatedSwitcher(
+                : ( isPortrait ? const Alignment(0.0, -0.5)
+                : (isLandscapeLeft ? const Alignment(0.7, 0.0) : const Alignment(-0.7, 0.0))),
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInExpo,
+            child: AnimatedSwitcher(  // serve per scambiare le caselle di testo aggiungendo un animazione
               duration: const Duration(milliseconds: 300),
               transitionBuilder: transitionBuilder,
               // Switch tra titolo normale e ruotato
               child: (flatMode || isPortrait)
-                  ? _buildModeTitle(titleText, key: ValueKey(titleText + "port"))
+                  ? _buildModeTitle(titleText, key: ValueKey(titleText + "port")) // aggiungiamo una ValueKey per comunica all'animated switcher che il contenuto del widget è cambiato
                   : RotatedBox(
                 quarterTurns: textTurns,
                 child: _buildModeTitle(titleText, key: ValueKey(titleText + "land")),
@@ -188,26 +194,28 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // 3. INFO CARD LINEARE (Animata in posizione e rotazione)
+          // 3. INFO CARD LINEARE
           AnimatedAlign(
             // Posizione: in basso per Portrait.
             // Per Landscape: invertito rispetto al titolo.
             alignment: (flatMode || isPortrait)
-                ? const Alignment(0.0, 0.85)
+                ? const Alignment(0.0, 0.8)
                 : (isLandscapeLeft ? const Alignment(-0.85, 0.0) : const Alignment(0.85, 0.0)),
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOutBack,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInExpo,
+
             child: AnimatedOpacity(
               // Visibile solo in modalità lineare
               opacity: flatMode ? 0.0 : 1.0,
               duration: const Duration(milliseconds: 300),
+
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 transitionBuilder: transitionBuilder,
                 // Switch tra info card normale e ruotata
                 child: isPortrait
                     ? _buildInfoCard(
-                    "Inclinazione (${isPortrait ? 'X' : 'Y'})",
+                    "${AppLocalizations.of(context)!.translate('Inclinazione')} (${isPortrait ? 'X' : 'Y'})",
                     angle,
                     key: const ValueKey("info_port"))
                     : RotatedBox(
@@ -221,12 +229,12 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // 4. INFO CARDS (Roll & Pitch)
+          // 4. INFO CARDS TORICHE
           AnimatedAlign(
             // Posizione: sempre in basso
             alignment: const Alignment(0.0, 0.85),
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOutBack,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInExpo,
             child: AnimatedOpacity(
               // Visibile solo in modalità piatta
               opacity: flatMode ? 1.0 : 0.0,
@@ -357,7 +365,7 @@ class _HomePageState extends State<HomePage> {
             Text(title,
                 style:
                 const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            const SizedBox(height: 1),
             Text(
               "${value.toStringAsFixed(1)}°",
               style: TextStyle(

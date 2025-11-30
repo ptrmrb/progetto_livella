@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'app.dart'; // Import del file App.dart
+import 'app.dart';
 
 void main() {
   // Assicuro che i binding siano inizializzati

@@ -33,29 +33,42 @@ class _AppState extends State<App> {
     return MaterialApp(
       title: 'Utility Toolset',
 
-      // --- TEMA CHIARO ---
+      // TEMA CHIARO
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.green,
           brightness: Brightness.light,
         ),
+        // APPBAR (Light)
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.green,
-          foregroundColor: Colors.white,
+          backgroundColor: Colors.transparent, // Sfondo trasparente
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            color: Colors.black,
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+          ),
+          iconTheme: IconThemeData(color: Colors.black),
         ),
         useMaterial3: true,
       ),
 
-      // --- TEMA SCURO ---
+      // TEMA SCURO
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.green,
           brightness: Brightness.dark,
         ),
         scaffoldBackgroundColor: Colors.grey[900],
+        // APPBAR (Dark)
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.grey.shade900,
-          foregroundColor: Colors.white,
+          backgroundColor: Colors.transparent,
+          centerTitle: true,
+          titleTextStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         useMaterial3: true,
       ),
