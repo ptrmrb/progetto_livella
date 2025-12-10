@@ -14,5 +14,8 @@
   "MODALITA_PIANO": "FLAT MODE",
   "MODALITA_VERTICALE": "PORTRAIT MODE",
   "MODALITA_ORIZZONTALE": "LANDSCAPE MODE",
-  "Inclinazione": "Tilt"
+  "Inclinazione": "Tilt",
+  "cronologia_misure": "Measurement History",
+  "history_setting_description": "Take a look at the saved measurements",
+  "no_saved_measurement": "No saved measurement"
 }

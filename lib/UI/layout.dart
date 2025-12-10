@@ -75,7 +75,7 @@ class MainLayout extends StatelessWidget {
                 ),
                 Tab(
                   icon: Transform.scale(
-                    scale: 1.5, // Aumenta questo valore se serve (es. 1.8)
+                    scale: 1.7,
                     child: const ImageIcon(
                       AssetImage('assets/images/livella_icon.png'),
                       size: 40.0, // Dimensione base

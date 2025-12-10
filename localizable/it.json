@@ -14,5 +14,8 @@
   "MODALITA_PIANO": "MODALITA PIANO",
   "MODALITA_VERTICALE": "MODALITA VERTICALE",
   "MODALITA_ORIZZONTALE": "MODALITA ORIZZONTALE",
-  "Inclinazione": "Inclinazione"
+  "Inclinazione": "Inclinazione",
+  "cronologia_misure": "Cronologia Misure",
+  "history_setting_description": "Visualizza le misurazioni salvate",
+  "no_saved_measurement": "Nessuna misura salvata"
 }

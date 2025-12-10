@@ -17,9 +17,10 @@ dependencies:
   # Sensori (Context-Aware)
   sensors_plus: ^7.0.0 # Per la livella [Lezione 1]
 
-  # Persistenza Dati
+  # database
   sqflite: ^2.3.3 # Per il database SQLite [Lezione 7]
   path: ^1.9.0 # Utility per sqflite
+  path_provider: ^2.1.2
 
   # Utility
   intl: ^0.20.2

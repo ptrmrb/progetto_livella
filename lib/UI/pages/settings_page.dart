@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import '../../model/support/app_localizations.dart';
+import 'history_page.dart';
 
 class SettingsPage extends StatefulWidget {
   final ThemeMode currentThemeMode;
@@ -87,7 +88,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   activeBgColors: const [
                     [Colors.orange, Colors.yellow],
                     [Colors.black87, Colors.black54],
-                    [Colors.blue, Colors.blueAccent],
+                    [Colors.green, Colors.greenAccent],
                   ],
                   animate: true,
                   curve: Curves.decelerate,
@@ -154,6 +155,29 @@ class _SettingsPageState extends State<SettingsPage> {
                   },
                 ),
               ],
+            ),
+
+            const SizedBox(height: 30), // Spazio tra le sezioni
+
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.history_edu, color: Theme.of(context).colorScheme.primary),
+              ),
+              title: Text(AppLocalizations.of(context)!.translate('cronologia_misure'), style: titleStyle?.copyWith(fontSize: 18)),
+              subtitle: Text(AppLocalizations.of(context)!.translate('history_setting_description'), style: TextStyle(fontSize: 14)),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HistoryPage()),
+                );
+              },
             ),
           ],
         ),

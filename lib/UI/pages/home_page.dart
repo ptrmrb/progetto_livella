@@ -3,6 +3,9 @@ import 'dart:math'; // Per funzioni matematiche (atan, pi)
 import 'package:flutter/material.dart'; // Framework UI
 import 'package:sensors_plus/sensors_plus.dart'; // Pacchetto sensori
 import '../../model/support/app_localizations.dart'; // Per le traduzioni
+// import per database
+import '../../model/managers/database_manager.dart';
+import '../../model/objects/measurement.dart';
 
 // Widget Stateful per la pagina principale
 class HomePage extends StatefulWidget {
@@ -58,6 +61,11 @@ class _HomePageState extends State<HomePage> {
     return _z.abs() > _x.abs() && _z.abs() > _y.abs();
   }
 
+  bool isPortrait() {
+    return _y.abs() > _x.abs();
+  }
+
+
   // Converte il valore dell'accelerometro in gradi
   double _calculateDegrees(double value) {
     double angleRadians = atan(value / 9.81); // /9.81 perche' otteniamo valori di accelerazione
@@ -100,6 +108,71 @@ class _HomePageState extends State<HomePage> {
   // Restituisce il colore della bolla (verde se a livello, rosso altrimenti)
   Color _getBubbleColor(bool isLevel) {
     return isLevel ? Colors.green : Colors.redAccent;
+  }
+
+  // FUNZIONE SALVATAGGIO
+  void _showSaveDialog(bool flatMode, double angle, double x, double y) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final TextEditingController descriptionController = TextEditingController();
+
+        return AlertDialog(
+          title: const Text("Salva Misura"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Tipo: ${flatMode ? 'Piatto' :
+              isPortrait() ? 'Vertiale' : 'Orizzontale'}"),
+              const SizedBox(height: 8),
+              flatMode
+                  ? Text("Roll: ${_calculateDegrees(x).toStringAsFixed(1)}°, Pitch: ${_calculateDegrees(y).toStringAsFixed(1)}°")
+                  : Text("Inclinazione: ${angle.toStringAsFixed(1)}°"),
+              const SizedBox(height: 16),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  labelText: "Descrizione (es. Tavolo Cucina)",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Annulla"),
+            ),
+            FilledButton(
+              onPressed: () async { // Aggiunto async per operazione DB
+                // 1. Creiamo l'oggetto Measurement
+                Measurement newMeasurement = Measurement(
+                  type: flatMode ? 'Piatto' : 'Lineare',
+                  x: x,
+                  y: y,
+                  angle: angle, // Salviamo comunque l'angolo, anche se piatto (magari non usato)
+                  timestamp: DateTime.now().millisecondsSinceEpoch,
+                  description: descriptionController.text.isEmpty
+                      ? "Misura senza nome"
+                      : descriptionController.text,
+                );
+
+                // 2. Chiamiamo il DatabaseManager per salvare
+                await DatabaseManager().insertMeasurement(newMeasurement);
+
+                if (context.mounted) {
+                  Navigator.pop(context); // Chiudi Dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Misura salvata nel Database!")),
+                  );
+                }
+              },
+              child: const Text("Salva"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -156,12 +229,18 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
+    // Callback per il salvataggio (cattura i valori attuali)
+    void onSave() {
+      _showSaveDialog(flatMode, angle, _x, _y);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           AppLocalizations.of(context)!.translate('livella'),
         ),
       ),
+
       // Usiamo uno Stack per posizionare liberamente gli elementi
       body: Stack(
         alignment: Alignment.center, // Centro dello stack come punto di riferimento
@@ -186,10 +265,10 @@ class _HomePageState extends State<HomePage> {
               transitionBuilder: transitionBuilder,
               // Switch tra titolo normale e ruotato
               child: (flatMode || isPortrait)
-                  ? _buildModeTitle(titleText, key: ValueKey(titleText + "port")) // aggiungiamo una ValueKey per comunica all'animated switcher che il contenuto del widget è cambiato
+                  ? _buildModeTitle(titleText, onSave: onSave, key: ValueKey(titleText + "port")) // aggiungiamo una ValueKey per comunica all'animated switcher che il contenuto del widget è cambiato
                   : RotatedBox(
                 quarterTurns: textTurns,
-                child: _buildModeTitle(titleText, key: ValueKey(titleText + "land")),
+                child: _buildModeTitle(titleText, onSave: onSave, key: ValueKey(titleText + "land")),
               ),
             ),
           ),
@@ -335,18 +414,41 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Widget Titolo
-  Widget _buildModeTitle(String title, {Key? key}) {
+  Widget _buildModeTitle(String title, {Key? key, required VoidCallback onSave}) {
     return Container(
       key: key,
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(10)),
-      child: Text(
-        title,
-        style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onPrimaryContainer),
+          borderRadius: BorderRadius.circular(20)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onPrimaryContainer),
+          ),
+          const SizedBox(width: 12),
+
+          InkWell(  // icona salvataggio misura
+            onTap: onSave,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.save_rounded,
+                size: 20,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
