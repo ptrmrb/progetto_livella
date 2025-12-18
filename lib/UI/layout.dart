@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:utility_toolset/UI/pages/history_page.dart';
 import 'pages/converter_page.dart';
 import 'pages/home_page.dart';
 import 'pages/settings_page.dart';
@@ -22,7 +23,7 @@ class MainLayout extends StatelessWidget {
     final brightness = Theme.of(context).brightness;
 
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         body: TabBarView(
           children: [
@@ -32,6 +33,7 @@ class MainLayout extends StatelessWidget {
               currentLocale: currentLocale,
               onLocaleChanged: onLocaleChanged,
             ),
+            const HistoryPage(),
             const HomePage(),
             const ConverterPage(),
           ],
@@ -43,16 +45,21 @@ class MainLayout extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               color: (brightness == Brightness.light)
-                  ? Colors.grey.shade900
+                  ? Colors.grey.shade400
                   : Colors.grey.shade800,
-
-              border: Border.all(color: Colors.black12, width: 4),
-              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                  color:  (brightness == Brightness.light)
+                  ? Colors.white38
+                  : Colors.black12,
+                  width: 4),
+              borderRadius: BorderRadius.circular(40),
             ),
 
             child: TabBar(
               labelColor: Colors.green, //colore della icona selezionata nella bnb
-              unselectedLabelColor: Colors.white60, // colore delle icone non selezionate nelle bnb
+              unselectedLabelColor:(brightness == Brightness.light) // colore delle icone non selezionate nelle bnb
+                  ? Colors.grey.shade800
+                  : Colors.white60,
               indicatorColor: Colors.transparent,
               splashBorderRadius: BorderRadius.circular(30.0),
               dividerHeight: 0.0,
@@ -66,12 +73,15 @@ class MainLayout extends StatelessWidget {
               // colori della pillola
               indicator: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(40),
               ),
 
               tabs: [
                 const Tab(
                   icon: Icon(Icons.settings_rounded, size: 35.0),
+                ),
+                const Tab(
+                  icon: Icon(Icons.history, size: 35.0),
                 ),
                 Tab(
                   icon: Transform.scale(

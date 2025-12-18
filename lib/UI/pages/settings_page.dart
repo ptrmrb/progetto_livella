@@ -74,7 +74,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   minWidth: 70.0,
                   minHeight: 50.0,
                   initialLabelIndex: _getThemeIndex(),
-                  cornerRadius: 20.0,
+                  cornerRadius: 30.0,
                   activeFgColor: Colors.white,
                   inactiveBgColor: Colors.grey[300],
                   inactiveFgColor: Colors.grey[800],
@@ -113,7 +113,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   minWidth: 90.0,
                   minHeight: 50.0,
                   initialLabelIndex: _getLocaleIndex(),
-                  cornerRadius: 20.0,
+                  cornerRadius: 30.0,
 
                   activeFgColor: Colors.black,
                   inactiveBgColor: Colors.grey[300],
@@ -155,29 +155,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   },
                 ),
               ],
-            ),
-
-            const SizedBox(height: 30), // Spazio tra le sezioni
-
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(Icons.history_edu, color: Theme.of(context).colorScheme.primary),
-              ),
-              title: Text(AppLocalizations.of(context)!.translate('cronologia_misure'), style: titleStyle?.copyWith(fontSize: 18)),
-              subtitle: Text(AppLocalizations.of(context)!.translate('history_setting_description'), style: TextStyle(fontSize: 14)),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HistoryPage()),
-                );
-              },
             ),
           ],
         ),
