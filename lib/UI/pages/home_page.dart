@@ -2,6 +2,7 @@ import 'dart:async'; // Per la gestione degli stream (sensori)
 import 'dart:math'; // Per funzioni matematiche (atan, pi)
 import 'package:flutter/material.dart'; // Framework UI
 import 'package:sensors_plus/sensors_plus.dart'; // Pacchetto sensori
+import 'package:geolocator/geolocator.dart'; // geolocalizzazione
 import '../../model/support/app_localizations.dart'; // Per le traduzioni
 // import per database
 import '../../model/managers/database_manager.dart';
@@ -36,6 +37,51 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  // LOGICA GEOLOCALIZZAZIONE
+
+  Future<bool> _handleLocationPermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              AppLocalizations.of(context)!.translate('location_disabled')
+          ),
+        ));
+      }
+      return false;
+    }
+
+    // 2. Verifica lo stato dei permessi
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      // 3. Richiedi permessi se negati
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(
+                AppLocalizations.of(context)!.translate('location_denied')
+            ),
+          ));
+        return false;
+      }
+    }
+
+    // 4. Gestione permessi negati permanentemente
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              AppLocalizations.of(context)!.translate('location_permanently_denied')
+          ),
+        ));
+      return false;
+    }
+    // Se arriviamo qui, abbiamo i permessi
+    return true;
+  }
+
   // Funzione per iniziare ad ascoltare i dati dell'accelerometro
   void _startListening() {
     _streamSubscription = accelerometerEvents.listen(
@@ -64,7 +110,6 @@ class _HomePageState extends State<HomePage> {
   bool isPortrait() {
     return _y.abs() > _x.abs();
   }
-
 
   // Converte il valore dell'accelerometro in gradi
   double _calculateDegrees(double value) {
@@ -110,66 +155,145 @@ class _HomePageState extends State<HomePage> {
     return isLevel ? Colors.green : Colors.redAccent;
   }
 
-  // FUNZIONE SALVATAGGIO
+  // FUNZIONE SALVATAGGIO AGGIORNATA
   void _showSaveDialog(bool flatMode, double angle, double x, double y) {
     showDialog(
       context: context,
+      barrierDismissible: false, // Impedisce chiusura accidentale durante il salvataggio
       builder: (BuildContext context) {
         final TextEditingController descriptionController = TextEditingController();
 
-        return AlertDialog(
-          title: const Text("Salva Misura"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Tipo: ${flatMode ? 'Piatto' :
-              isPortrait() ? 'Vertiale' : 'Orizzontale'}"),
-              const SizedBox(height: 8),
-              flatMode
-                  ? Text("Roll: ${_calculateDegrees(x).toStringAsFixed(1)}°, Pitch: ${_calculateDegrees(y).toStringAsFixed(1)}°")
-                  : Text("Inclinazione: ${angle.toStringAsFixed(1)}°"),
-              const SizedBox(height: 16),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(
-                  labelText: "Descrizione (es. Tavolo Cucina)",
-                  border: OutlineInputBorder(),
-                ),
+        // Variabile di stato locale per il dialog
+        bool _isSaving = false;
+
+        String labelType = AppLocalizations.of(context)!.translate('tipo');
+        String valFlat = AppLocalizations.of(context)!.translate('piatto');
+        String valVert = AppLocalizations.of(context)!.translate('verticale');
+        String valHoriz = AppLocalizations.of(context)!.translate('orizzontale');
+        String labelRoll = AppLocalizations.of(context)!.translate('roll');
+        String labelPitch = AppLocalizations.of(context)!.translate('pitch');
+        String labelTilt = AppLocalizations.of(context)!.translate('Inclinazione');
+
+        // StatefulBuilder è NECESSARIO per aggiornare la UI dentro il Dialog senza chiuderlo
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: Text(AppLocalizations.of(context)!.translate('salva_misura')),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // SE STIAMO SALVANDO, MOSTRA LA ROTELLINA
+                  if (_isSaving) ...[
+                    const SizedBox(height: 20),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 20),
+                    Text(AppLocalizations.of(context)!.translate('posizione_salvata'), textAlign: TextAlign.center),
+                    const SizedBox(height: 10),
+                    Text(
+                        AppLocalizations.of(context)!.translate('tempo_richiesto'),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        textAlign: TextAlign.center
+                    ),
+                  ]
+                  // ALTRIMENTI MOSTRA I CAMPI DI INPUT NORMALI
+                  else ...[
+                    Text("$labelType: ${flatMode ? valFlat : isPortrait() ? valVert : valHoriz}"),
+                    const SizedBox(height: 8),
+                    flatMode
+                        ? Text("$labelRoll: ${_calculateDegrees(x).toStringAsFixed(1)}°, $labelPitch: ${_calculateDegrees(y).toStringAsFixed(1)}°")
+                        : Text("$labelTilt: ${angle.toStringAsFixed(1)}°"), SizedBox(height: 16),
+                    TextField(
+                      controller: descriptionController,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.translate('descrizione_hint'),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Annulla"),
-            ),
-            FilledButton(
-              onPressed: () async { // Aggiunto async per operazione DB
-                // 1. Creiamo l'oggetto Measurement
-                Measurement newMeasurement = Measurement(
-                  type: flatMode ? 'Piatto' : 'Lineare',
-                  x: x,
-                  y: y,
-                  angle: angle, // Salviamo comunque l'angolo, anche se piatto (magari non usato)
-                  timestamp: DateTime.now().millisecondsSinceEpoch,
-                  description: descriptionController.text.isEmpty
-                      ? "Misura senza nome"
-                      : descriptionController.text,
-                );
+              // NASCONDI I PULSANTI DURANTE IL CARICAMENTO
+              actions: _isSaving ? [] : [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(AppLocalizations.of(context)!.translate('annulla')),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    // 1. ATTIVA LA ROTELLINA
+                    setStateDialog(() {
+                      _isSaving = true;
+                    });
 
-                // 2. Chiamiamo il DatabaseManager per salvare
-                await DatabaseManager().insertMeasurement(newMeasurement);
+                    double? lat;
+                    double? long;
 
-                if (context.mounted) {
-                  Navigator.pop(context); // Chiudi Dialog
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Misura salvata nel Database!")),
-                  );
-                }
-              },
-              child: const Text("Salva"),
-            ),
-          ],
+                    // Blocchiamo eventuali crash imprevisti
+                    try {
+                      // Controlliamo i permessi
+                      bool hasPermission = await _handleLocationPermission();
+
+                      if (hasPermission) {
+                        try {
+                          // imeout 5 secondi -> Poi Fallback
+                          debugPrint("Tentativo GPS corrente...");
+                          Position position = await Geolocator.getCurrentPosition(
+                              desiredAccuracy: LocationAccuracy.high,
+                              timeLimit: const Duration(seconds: 5)
+                          );
+                          lat = position.latitude;
+                          long = position.longitude;
+                        } catch (e) {
+                          debugPrint("Timeout GPS corrente ($e). Tento ultima posizione nota.");
+
+                          // FALLBACK: Ultima posizione nota
+                          try {
+                            Position? lastKnown = await Geolocator.getLastKnownPosition();
+                            if (lastKnown != null) {
+                              lat = lastKnown.latitude;
+                              long = lastKnown.longitude;
+                            }
+                          } catch (e2) {
+                            debugPrint("Nessuna posizione fallback: $e2");
+                          }
+                        }
+                      }
+                    } catch (e) {
+                      debugPrint("Errore critico GeoLocator: $e");
+                    }
+
+                    // Creazione oggetto Misura
+                    Measurement newMeasurement = Measurement(
+                      type: flatMode ? 'Piatto' : 'Lineare',
+                      x: x,
+                      y: y,
+                      angle: angle,
+                      timestamp: DateTime.now().millisecondsSinceEpoch,
+                      description: descriptionController.text.isEmpty
+                          ? AppLocalizations.of(context)!.translate('misura_senza_nome')
+                          : descriptionController.text,
+                      latitude: lat,
+                      longitude: long,
+                    );
+
+                    // Salvataggio nel DB
+                    await DatabaseManager().insertMeasurement(newMeasurement);
+
+                    // Chiudiamo il dialog solo se il contesto esiste ancora
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      String msgPrefix = AppLocalizations.of(context)!.translate('salvato_gps');
+                      String ndText = AppLocalizations.of(context)!.translate('nd');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("$msgPrefix: ${lat != null ? 'OK' : ndText}")),
+                      );
+                    }
+                  },
+                  child: Text(AppLocalizations.of(context)!.translate('salva')),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -300,7 +424,7 @@ class _HomePageState extends State<HomePage> {
                     : RotatedBox(
                   quarterTurns: textTurns,
                   child: _buildInfoCard(
-                      "Inclinazione (${isPortrait ? 'X' : 'Y'})",
+                      "${AppLocalizations.of(context)!.translate('Inclinazione')} (${isPortrait ? 'X' : 'Y'})",
                       angle,
                       key: const ValueKey("info_land")),
                 ),
@@ -321,8 +445,8 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildInfoCard("Roll (X)", _calculateDegrees(_x)),
-                  _buildInfoCard("Pitch (Y)", _calculateDegrees(_y)),
+                  _buildInfoCard("${AppLocalizations.of(context)!.translate('roll')} (X)", _calculateDegrees(_x)),
+                  _buildInfoCard("${AppLocalizations.of(context)!.translate('pitch')} (Y)", _calculateDegrees(_y)),
                 ],
               ),
             ),

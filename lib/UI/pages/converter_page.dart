@@ -195,7 +195,7 @@ class _ConverterPageState extends State<ConverterPage> {
             return DropdownMenuItem<String>(
               value: category,
               child: Text(
-                category,
+                AppLocalizations.of(context)!.translate(category.toLowerCase()),
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             );
@@ -226,7 +226,10 @@ class _ConverterPageState extends State<ConverterPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("DA", style: TextStyle(color: colorScheme.secondary, fontWeight: FontWeight.bold)),
+            Text(
+                AppLocalizations.of(context)!.translate('da'),
+                style: TextStyle(color: colorScheme.secondary, fontWeight: FontWeight.bold)
+            ),
             const SizedBox(height: 10),
 
             Row(
@@ -262,7 +265,10 @@ class _ConverterPageState extends State<ConverterPage> {
                       items: _units[_selectedCategory]!.map((String unit) {
                         return DropdownMenuItem<String>(
                           value: unit,
-                          child: Text(unit),
+                          child: Text(
+                            // Traduzione unità
+                              AppLocalizations.of(context)!.translate(unit.toLowerCase())
+                          ),
                         );
                       }).toList(),
                       onChanged: (String? newValue) {
@@ -293,7 +299,10 @@ class _ConverterPageState extends State<ConverterPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("A", style: TextStyle(color: colorScheme.onPrimaryContainer, fontWeight: FontWeight.bold)),
+            Text(
+                AppLocalizations.of(context)!.translate('a'),
+                style: TextStyle(color: colorScheme.onPrimaryContainer, fontWeight: FontWeight.bold)
+            ),
             const SizedBox(height: 10),
 
             Row(
@@ -328,7 +337,9 @@ class _ConverterPageState extends State<ConverterPage> {
                       items: _units[_selectedCategory]!.map((String unit) {
                         return DropdownMenuItem<String>(
                           value: unit,
-                          child: Text(unit),
+                          child: Text(
+                              AppLocalizations.of(context)!.translate(unit.toLowerCase())
+                          ),
                         );
                       }).toList(),
                       onChanged: (String? newValue) {

@@ -32,7 +32,9 @@ class _HistoryPageState extends State<HistoryPage> {
     _loadData(); // Ricarica la lista dopo la cancellazione
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Misura eliminata")),
+        SnackBar(content: Text(
+            AppLocalizations.of(context)!.translate('misura_eliminata')
+        )),
       );
     }
   }
@@ -52,7 +54,8 @@ class _HistoryPageState extends State<HistoryPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text("Errore: ${snapshot.error}"));
+            String errorLabel = AppLocalizations.of(context)!.translate('errore_label');
+            return Center(child: Text("$errorLabel: ${snapshot.error}"));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
               child: Column(
@@ -75,6 +78,12 @@ class _HistoryPageState extends State<HistoryPage> {
               final item = measurements[index];
               final dateStr = DateFormat('dd/mm/yyyy hh:mm').format(item.date);
 
+              String dataLabel = AppLocalizations.of(context)!.translate('data_label');
+              String rollLabel = AppLocalizations.of(context)!.translate('roll') ;
+              String pitchLabel = AppLocalizations.of(context)!.translate('pitch') ;
+              String tiltLabel = AppLocalizations.of(context)!.translate('Inclinazione');
+              String gpsLabel = AppLocalizations.of(context)!.translate('gps_label');
+
               return Card(
                 elevation: 2,
                 margin: const EdgeInsets.only(bottom: 12),
@@ -96,14 +105,29 @@ class _HistoryPageState extends State<HistoryPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 4),
-                      Text("Data: $dateStr", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                      Text("$dataLabel: $dateStr", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                       const SizedBox(height: 4),
                       if (item.type == 'Piatto')
-                        Text("Roll: ${item.x.toStringAsFixed(1)}° | Pitch: ${item.y.toStringAsFixed(1)}°")
+                        Text("$rollLabel: ${item.x.toStringAsFixed(1)}° | $pitchLabel: ${item.y.toStringAsFixed(1)}°")
                       else
-                        Text("Inclinazione: ${item.angle.toStringAsFixed(1)}°"),
+                        Text("$tiltLabel: ${item.angle.toStringAsFixed(1)}°"),
+
+                      if (item.latitude != null && item.longitude != null) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(Icons.location_on, size: 14, color: Colors.grey[600]),
+                            const SizedBox(width: 4),
+                            Text(
+                              "$gpsLabel: ${item.latitude!.toStringAsFixed(4)}°, ${item.longitude!.toStringAsFixed(4)}°",
+                              style: TextStyle(fontSize: 12, color: Colors.grey[800]),
+                            ),
+                          ],
+                        ),
+                      ]
                     ],
                   ),
+
                   trailing: IconButton(
                     icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
                     onPressed: () => _deleteItem(item.id!),

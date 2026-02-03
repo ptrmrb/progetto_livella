@@ -3,7 +3,6 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import '../objects/measurement.dart';
-import 'package:flutter/foundation.dart';
 
 class DatabaseManager {
   static final DatabaseManager _instance = DatabaseManager._internal();
@@ -26,11 +25,10 @@ class DatabaseManager {
       String path = join(documentsDirectory.path, "utility_toolset.db");
 
       return await openDatabase(
-          path,
-          version: 1,
-          onCreate: _onCreate,
-          onOpen: (db) {
-          }
+        path,
+        version: 2,
+        onCreate: _onCreate,
+        onUpgrade: _onUpgrade, // Gestisce chi ha già l'app installata
       );
     } catch (e) {
       rethrow;
@@ -46,19 +44,27 @@ class DatabaseManager {
         y REAL,
         angle REAL,
         timestamp INTEGER,
-        description TEXT
+        description TEXT,
+        latitude REAL,
+        longitude REAL
       )
     ''');
   }
 
-  // CRUD
+  // Questa funzione viene chiamata automaticamente se l'utente ha la versione 1 del DB
+  // e aggiorna la tabella aggiungendo le colonne mancanti.
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute("ALTER TABLE measurements ADD COLUMN latitude REAL");
+      await db.execute("ALTER TABLE measurements ADD COLUMN longitude REAL");
+    }
+  }
 
+  // CRUD
   Future<int> insertMeasurement(Measurement measurement) async {
     try {
       Database db = await database;
-
       int id = await db.insert('measurements', measurement.toMap());
-
       return id;
     } catch (e) {
       return -1;

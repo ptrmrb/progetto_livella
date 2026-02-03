@@ -6,6 +6,8 @@ class Measurement { // Rappresenta una singola misurazione salvata in app
   final double angle; // Angolo calcolato (per lineare)
   final int timestamp; // Data in millisecondi
   final String description; // Descrizione utente
+  final double? latitude;
+  final double? longitude;
 
   Measurement({
     this.id,
@@ -15,6 +17,8 @@ class Measurement { // Rappresenta una singola misurazione salvata in app
     required this.angle,
     required this.timestamp,
     required this.description,
+    this.latitude,
+    this.longitude,
   });
 
   // Converte un oggetto Measurement in una Map (per inserirlo nel DB)
@@ -27,6 +31,8 @@ class Measurement { // Rappresenta una singola misurazione salvata in app
       'angle': angle,
       'timestamp': timestamp,
       'description': description,
+      'latitude': latitude,
+      'longitude': longitude
     };
   }
 
@@ -40,6 +46,8 @@ class Measurement { // Rappresenta una singola misurazione salvata in app
       angle: map['angle'],
       timestamp: map['timestamp'],
       description: map['description'],
+      latitude: map['latitude'],
+      longitude: map['longitude']
     );
   }
 
